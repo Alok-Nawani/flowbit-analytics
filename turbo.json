@@ -1,14 +1,39 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "globalDependencies": ["**/.env.*local"],
+  "globalEnv": [
+    "DATABASE_URL",
+    "VANNA_API_BASE_URL",
+    "VANNA_API_KEY",
+    "GROQ_API_KEY",
+    "CORS_ORIGIN",
+    "NEXT_PUBLIC_APP_URL",
+    "NEXT_PUBLIC_API_BASE"
+  ],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": [".next/**", "!.next/cache/**", "dist/**"]
+      "outputs": [".next/**", "!.next/cache/**", "dist/**"],
+      "env": [
+        "DATABASE_URL",
+        "VANNA_API_BASE_URL",
+        "VANNA_API_KEY",
+        "NEXT_PUBLIC_APP_URL",
+        "NEXT_PUBLIC_API_BASE"
+      ]
     },
     "dev": {
       "cache": false,
-      "persistent": true
+      "persistent": true,
+      "env": [
+        "DATABASE_URL",
+        "VANNA_API_BASE_URL",
+        "VANNA_API_KEY",
+        "GROQ_API_KEY",
+        "CORS_ORIGIN",
+        "NEXT_PUBLIC_APP_URL",
+        "NEXT_PUBLIC_API_BASE"
+      ]
     },
     "lint": {
       "dependsOn": ["^lint"]
