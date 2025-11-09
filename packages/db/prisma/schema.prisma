@@ -1,0 +1,123 @@
+// packages/db/prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Vendor {
+  id           String    @id @default(cuid())
+  externalId   String?   @unique
+  name         String
+  taxId        String?   @unique
+  email        String?
+  phone        String?
+  addressLine1 String?
+  addressLine2 String?
+  city         String?
+  state        String?
+  country      String?
+  postalCode   String?
+  categoryId   String?
+  category     Category? @relation(fields: [categoryId], references: [id])
+  invoices     Invoice[]
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+model Customer {
+  id           String   @id @default(cuid())
+  externalId   String?  @unique
+  name         String
+  email        String?
+  phone        String?
+  addressLine1 String?
+  addressLine2 String?
+  city         String?
+  state        String?
+  country      String?
+  postalCode   String?
+  invoices     Invoice[]
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Category {
+  id        String    @id @default(cuid())
+  name      String    @unique
+  vendors   Vendor[]
+  invoices  Invoice[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Invoice {
+  id              String          @id @default(cuid())
+  externalId      String?         @unique
+  invoiceNumber   String          @unique
+  vendorId        String
+  vendor          Vendor          @relation(fields: [vendorId], references: [id])
+  customerId      String?
+  customer        Customer?       @relation(fields: [customerId], references: [id])
+  categoryId      String?
+  category        Category?       @relation(fields: [categoryId], references: [id])
+  invoiceDate     DateTime
+  dueDate         DateTime?
+  status          InvoiceStatus   @default(PENDING)
+  currency        String          @default("INR")
+  subtotal        Decimal
+  tax             Decimal?
+  discount        Decimal?
+  total           Decimal
+  paidAmount      Decimal         @default(0)
+  lineItems       InvoiceLineItem[]
+  payments        Payment[]
+  documents       Document[]
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+}
+
+enum InvoiceStatus {
+  PENDING
+  APPROVED
+  PAID
+  PARTIALLY_PAID
+  OVERDUE
+  CANCELLED
+}
+
+model InvoiceLineItem {
+  id           String   @id @default(cuid())
+  invoiceId    String
+  invoice      Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  description  String
+  quantity     Int
+  unitPrice    Decimal
+  total        Decimal
+  createdAt    DateTime @default(now())
+}
+
+model Payment {
+  id           String   @id @default(cuid())
+  invoiceId    String
+  invoice      Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  paymentDate  DateTime
+  amount       Decimal
+  method       String?
+  reference    String?
+  createdAt    DateTime @default(now())
+}
+
+model Document {
+  id         String   @id @default(cuid())
+  invoiceId  String
+  invoice    Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  url        String
+  kind       String?
+  uploadedAt DateTime @default(now())
+}
+
